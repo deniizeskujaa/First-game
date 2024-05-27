@@ -22,17 +22,20 @@
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
 
-    let cat1 = { x: 50, y: 495, image: new Image() };
-    let cat2 = { x: 650, y: 485, image: new Image() };
+    const backgroundImage = new Image();
+    backgroundImage.src = "https://st2.depositphotos.com/3759469/6798/v/450/depositphotos_67982979-stock-illustration-horizontally-seamless-game-background.jpg"
+
+    let cat1 = { x: 50, y: 497, image: new Image() };
+    let cat2 = { x: 650, y: 491, image: new Image() };
     const catWidth = 125; // Set desired width for cats
     const catHeight = 125; // Set desired height for cats
 
     cat1.image.src = "https://png.pngtree.com/png-clipart/20230405/original/pngtree-cute-cat-sticker-cartoon-kitten-kitty-png-image_9029344.png";
-    cat2.image.src = "https://i.pinimg.com/736x/ca/c1/95/cac195ac88e654b8d70a000ed22fa273.jpg";
+    cat2.image.src = "https://png.pngtree.com/png-clipart/20230129/original/pngtree-sticker-of-a-cat-png-image_8933774.png";
 
     let objects = [];
     const objTypes = [
-        { src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3nhbeMQJzv8cdecqTOKrn3ErG8pvMKP6uifY3tdX4xA&s", type: "good", width: 90, height: 90 },
+        { src: "https://static.vecteezy.com/system/resources/previews/024/029/919/non_2x/mouse-icon-clipart-transparent-background-free-png.png", type: "good", width: 90, height: 90 },
         { src: "https://www.pngkit.com/png/full/69-697233_mouse-animal-clipart.png", type: "bad", width: 50, height: 50 }
     ];
 
@@ -110,10 +113,15 @@
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "purple";
-        ctx.font = "20px Arial";
-        ctx.fillText("Player 1 Score: " + score1, 20, 20);
-        ctx.fillText("Player 2 Score: " + score2, canvas.width - 160, 20);
+
+        if (backgroundImage.complete) {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.fillStyle = "pink";
+        ctx.font = "24px Arial";
+        ctx.fillText("Player 1 Score: " + score1, 20, 40);
+        ctx.fillText("Player 2 Score: " + score2, canvas.width - 210, 40);
 
         if (cat1.image.complete) {
             ctx.drawImage(cat1.image, cat1.x, cat1.y, catWidth, catHeight);

@@ -1,74 +1,164 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
  <head>
-  <title> My Melon Falling Game </title>
- </head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial scale=1.0">
+<title> Mouse Falling Game </title>
+<style>
+    canvas {
+        border: 8px solid black;
+        display: block;
+        margin: auto;
+    }
+    body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+    }
+</style>
+</head>
 <body>
-<canvas id="myCanvas" width=200 height=200 style="background:url('/img/etc/boardwalk.png'); background-size: cover">
-  </canvas> 
+<canvas id="myCanvas" width="800" height="600"></canvas> 
 <script>
-    var ctx = myCanvas.getContext("2d");
-var bug_x = 0;
- var bug_y = 0;
- var BugImg = new Image();
- BugImg.src = "https://p7.hiclipart.com/preview/456/61/155/cat-sticker-wall-decal-adhesive-stickers.jpg";         
- var melon_x = 0;
- var melon_y = 0;
- var MelonImg = new Image();
- MelonImg.src = "https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTA0L2pvYjk2Ny0wNTNiLXAucG5n.png";  
- var score = 0;
- var melon_speed = 3;
- var FPS = 40;                        
- var time_remaining = 20;
-function restart_game() {
-     time_remaining = 180;
-     score = 0;
-     melon_speed = 3;
-     }
-function ImagesTouching(x1, y1, img1, x2, y2, img2) {
-          if (x1 >= x2+img2.width || x1+img1.width <= x2) return false;   
-          if (y1 >= y2+img2.height || y1+img1.height <= y2) return false; 
-          return true;                                                       
-          }
-function Do_a_Frame () {
-    ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);                 
-    ctx.fillStyle= "purple";
-    ctx.font = "20px Arial";
-    ctx.fillText("Score: " + score, 0, 20);                               
-    bug_y = myCanvas.height - BugImg.height;                              
-    ctx.drawImage(BugImg, bug_x, bug_y);                                  
-    ctx.fillText("Time Remaining: " + Math.round(time_remaining), 0, 45); }
-if (time_remaining <= 0) {                                            
-          ctx.fillStyle= "red";
-          ctx.font = "bold 50px Arial";                                   
-          ctx.textAlign="center";
-          ctx.fillText("Game Over", myCanvas.width / 2, myCanvas.height / 2);  
-          ctx.font = "bold 20px Arial";
-          ctx.fillText("Press S to play again", myCanvas.width / 2, (myCanvas.height / 2)+50);
-          ctx.textAlign="left"; }      
-else {
-          time_remaining = time_remaining - 1/FPS;                        
-          melon_y = melon_y + melon_speed;  }                              
-          if (melon_y > myCanvas.height)                                 
-              melon_y= 0;                                                 
-              melon_x= Math.random() * (myCanvas.width - MelonImg.width); 
-ctx.drawImage(MelonImg, melon_x, melon_y);                            
-    if (ImagesTouching(bug_x, bug_y, BugImg, melon_x, melon_y, MelonImg)) {  
-        score= score + 1;                                                    
-        melon_speed = melon_speed + 0.5;                                     
-        melon_x= -MelonImg.width;                                            
-        }
-     setInterval(Do_a_Frame, 1000/FPS);                                          
-function MyKeyDownHandler (MyEvent) { 
-   if (MyEvent.keyCode == 37 && bug_x > 0) {bug_x = bug_x - 10;}                          
-   if (MyEvent.keyCode == 39 && bug_x+BugImg.width < myCanvas.width) {bug_x = bug_x+10;}  
-   if (MyEvent.keyCode == 83) restart_game();                                             
-   MyEvent.preventDefault();
-   }
- addEventListener("keydown", MyKeyDownHandler);                      
- myCanvas.width = window.innerWidth - 20;                            
- myCanvas.height = window.innerHeight - 20;                          
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
 
+    let cat1 = { x: 50, y: 495, image: new Image() };
+    let cat2 = { x: 650, y: 485, image: new Image() };
+    const catWidth = 125; // Set desired width for cats
+    const catHeight = 125; // Set desired height for cats
+
+    cat1.image.src = "https://png.pngtree.com/png-clipart/20230405/original/pngtree-cute-cat-sticker-cartoon-kitten-kitty-png-image_9029344.png";
+    cat2.image.src = "https://i.pinimg.com/736x/ca/c1/95/cac195ac88e654b8d70a000ed22fa273.jpg";
+
+    let objects = [];
+    const objTypes = [
+        { src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3nhbeMQJzv8cdecqTOKrn3ErG8pvMKP6uifY3tdX4xA&s", type: "good", width: 90, height: 90 },
+        { src: "https://www.pngkit.com/png/full/69-697233_mouse-animal-clipart.png", type: "bad", width: 50, height: 50 }
+    ];
+
+    const gameDuration = 180000; // 3 minutes in milliseconds
+    const speedIncreaseInterval = 10000; // every 10 seconds
+    let score1 = 0;
+    let score2 = 0;
+    let speedMultiplier = 1;
+
+    document.addEventListener('keydown', (event) => {
+        switch (event.key) {
+            case 'ArrowLeft':
+                if (cat1.x > 0) cat1.x -= 10;
+                break;
+            case 'ArrowRight':
+                if (cat1.x + catWidth < canvas.width) cat1.x += 10;
+                break;
+            case 'ArrowUp':
+                if (cat1.y > 0) cat1.y -= 10;
+                break;
+            case 'ArrowDown':
+                if (cat1.y + catHeight < canvas.height) cat1.y += 10;
+                break;
+            case 'a':
+                if (cat2.x > 0) cat2.x -= 10;
+                break;
+            case 'd':
+                if (cat2.x + catWidth < canvas.width) cat2.x += 10;
+                break;
+            case 'w':
+                if (cat2.y > 0) cat2.y -= 10;
+                break;
+            case 's':
+                if (cat2.y + catHeight < canvas.height) cat2.y += 10;
+                break;
+        }
+    });
+
+    function generateObject() {
+        let objType = objTypes[Math.floor(Math.random() * objTypes.length)];
+        let x = Math.random() * (canvas.width - 50);
+        let y = 0;
+        let dx = (Math.random() - 0.5) * 4;
+        let dy = 3 * speedMultiplier;
+        let image = new Image();
+        image.src = objType.src;
+        image.onload = function () {
+            objects.push({ x, y, dx, dy, image, type: objType.type, width: objType.width, height: objType.height });
+        };
+    }
+
+    function checkCollision(cat, object) {
+        return cat.x < object.x + object.width &&
+               cat.x + catWidth > object.x &&
+               cat.y < object.y + object.height &&
+               cat.y + catHeight > object.y;
+    }
+
+    function updateObjects() {
+        objects.forEach((obj, index) => {
+            obj.x += obj.dx;
+            obj.y += obj.dy;
+
+            if (obj.y > canvas.height || obj.x < 0 || obj.x > canvas.width) {
+                objects.splice(index, 1);
+                if (obj.type === "good") {
+                    if (obj.y > canvas.height) {
+                        if (obj.player === 1) score1--;
+                        else score2--;
+                    }
+                }
+            }
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "purple";
+        ctx.font = "20px Arial";
+        ctx.fillText("Player 1 Score: " + score1, 20, 20);
+        ctx.fillText("Player 2 Score: " + score2, canvas.width - 160, 20);
+
+        if (cat1.image.complete) {
+            ctx.drawImage(cat1.image, cat1.x, cat1.y, catWidth, catHeight);
+        }
+        if (cat2.image.complete) {
+            ctx.drawImage(cat2.image, cat2.x, cat2.y, catWidth, catHeight);
+        }
+
+        objects.forEach((obj, index) => {
+            if (obj.image.complete) {
+                ctx.drawImage(obj.image, obj.x, obj.y, obj.width, obj.height);
+                if (checkCollision(cat1, obj)) {
+                    if (obj.type === "good") {
+                        score1++;
+                    } else {
+                        score1--;
+                    }
+                    objects.splice(index, 1);
+                } else if (checkCollision(cat2, obj)) {
+                    if (obj.type === "good") {
+                        score2++;
+                    } else {
+                        score2--;
+                    }
+                    objects.splice(index, 1);
+                }
+            }
+        });
+    }
+
+    function gameLoop() {
+        updateObjects();
+        draw();
+    }
+
+    const gameInterval = setInterval(gameLoop, 25);
+    const objectGenerationInterval = setInterval(generateObject, 1000);
+    const speedIncreaseIntervalId = setInterval(() => speedMultiplier++, speedIncreaseInterval);
+
+    setTimeout(() => {
+        clearInterval(gameInterval);
+        clearInterval(objectGenerationInterval);
+        clearInterval(speedIncreaseIntervalId);
+        alert("Game over! Final Scores:\nPlayer 1: " + score1 + "\nPlayer 2: " + score2);
+    }, gameDuration);
 </script>
 </body>
 </html>
